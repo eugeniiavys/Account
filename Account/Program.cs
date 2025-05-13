@@ -55,6 +55,153 @@ namespace Account
         }
     }
 
+
+    public abstract class Deposit
+    {
+        public decimal Amount { get; }
+        public int Period { get; }
+
+        protected Deposit(decimal depositAmount, int depositPeriod)
+        {
+            Amount = depositAmount;
+            Period = depositPeriod;
+        }
+
+        public abstract decimal Income();
+    }
+
+
+    public class BaseDeposit : Deposit
+    {
+        public BaseDeposit(decimal depositAmount, int depositPeriod) : base(depositAmount, depositPeriod)
+        {
+        }
+
+        public override decimal Income()
+        {
+            decimal total = Amount;
+
+            for (int i = 0; i < Period; i++)
+            {
+                total = Math.Round(total * 1.05m, 2);
+            }
+
+            return total - Amount;
+        }
+    }
+
+    public class LongDeposit : Deposit
+    {
+        public LongDeposit(decimal amount, int period) : base(amount, period)
+        {
+        }
+
+        public override decimal Income()
+        {
+            decimal total = Amount;
+
+            for (int i = 0; i < Period; i++)
+            {
+                if (i >= 6)
+                {
+                    total = Math.Round(total * 1.15m, 2);
+                }
+            }
+
+            return total - Amount;
+        }
+    }
+
+
+    public class SpecialDeposit : Deposit
+    {
+        public SpecialDeposit(decimal amount, int period) : base(amount, period)
+        {
+        }
+
+        public override decimal Income()
+        {
+            decimal total = Amount;
+
+            for (int i = 0; i < Period; i++)
+            {
+                decimal interestRate = (i + 1) / 100.0m;
+                total = Math.Round(total * (1 + interestRate), 2);
+            }
+
+            return total - Amount;
+        }
+    }
+    public class Client
+    {
+        private Deposit[] deposits;
+
+        public Client()
+        {
+            deposits = new Deposit[10];
+        }
+
+        public bool AddDeposit(Deposit deposit)
+        {
+            for (int i = 0; i < deposits.Length; i++)
+            {
+                if (deposits[i] == null)
+                {
+                    deposits[i] = deposit;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public decimal TotalIncome()
+        {
+            decimal total = 0;
+
+            foreach (var deposit in deposits)
+            {
+                if (deposit != null)
+                {
+                    total += deposit.Income();
+                }
+            }
+
+            return total;
+        }
+
+        public decimal MaxIncome()
+        {
+            decimal maxIncome = 0;
+
+            foreach (var deposit in deposits)
+            {
+                if (deposit != null)
+                {
+                    decimal income = deposit.Income();
+                    if (income > maxIncome)
+                    {
+                        maxIncome = income;
+                    }
+                }
+            }
+
+            return maxIncome;
+        }
+
+        public decimal GetIncomeByNumber(int number)
+        {
+            int index = number - 1;
+
+            if (index >= 0 && index < deposits.Length && deposits[index] != null)
+            {
+                return deposits[index].Income();
+            }
+
+            return 0;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
